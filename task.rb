@@ -15,11 +15,11 @@ class Task
   private
 
   def self.get_image(urls)
-    get URI.parse("http://localhost:9001/montage?l=#{urls[0]}&r=#{urls[1]}")
+    get URI.parse("http://#{ENV['SF_MONTAGE_HOST']}/montage?l=#{urls[0]}&r=#{urls[1]}")
   end
 
   def self.get_urls
-    r = get(URI.parse("http://localhost:9000/next"))
+    r = get(URI.parse("http://#{ENV['SF_QUEUE_HOST']}/next"))
     JSON.parse(r)
   end
 
