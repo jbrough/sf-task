@@ -3,12 +3,17 @@ require_relative 'task'
 
 class TaskHandler
   def call(env)
-    buf = Task.next
-    if buf == 0
-      [200, {}, []]
+    req = Rack::Request.new(env)
+    if !req.post?
+      return [405, {}, ["Method Not Allowed"]]
+    end
+
+    location = Task.next
+    if !location
+      [204, {}, []]
     else
-      headers = { 'Content-Type' => 'image/jpeg' }
-      [200, headers, [buf]]
+      headers = { 'Location' => location }
+      [201, headers, []]
     end
   end
 end
