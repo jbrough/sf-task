@@ -16,7 +16,7 @@ class Task
     end
   end
 
-  private
+  #private
 
   def self.storage_uri(urls)
     name = Digest::SHA256.hexdigest(urls.to_json)
