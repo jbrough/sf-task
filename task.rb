@@ -1,19 +1,17 @@
 require 'net/http'
 require 'uri'
 require 'json'
-require 'digest'
 
 class Task
   def self.next
-    urls = get_urls
-    if urls.empty?
-      return nil, nil
-    end
+    url1, url2, filename, empty = get_urls
+    return nil, nil if empty
 
+    urls = [url1, url2]
     buf, err = get_image(urls)
     return handle_err(urls) if err
 
-    r, err = post(storage_url(urls), buf)
+    r, err = post(storage_url(filename), buf)
     return handle_err(urls) if err
 
     return r['Location'], nil
@@ -22,13 +20,12 @@ class Task
   private
 
   def self.handle_err(urls)
-    post("http://#{ENV['SF_QUEUE_HOST']}/add/error", JSON.parse(urls))
+    post("http://#{ENV['SF_QUEUE_HOST']}/add/error", urls.to_json)
     # TODO: log errors in post, as failures will be missing from both queues
-    return nil, nil, err
+    return nil, nil, nil
   end
 
-  def self.storage_url(urls)
-    name = Digest::SHA256.hexdigest(urls.to_json)
+  def self.storage_url(name)
     "http://#{ENV['SF_STORAGE_HOST']}/#{name}"
   end
 
@@ -38,7 +35,13 @@ class Task
 
   def self.get_urls
     r = post("http://#{ENV['SF_QUEUE_HOST']}/next")
-    JSON.parse(r.body)
+    res = JSON.parse(r.body)
+
+    if res['empty']
+      return nil, nil, nil, true
+    else
+      return res['item']
+    end
   end
 
   def self.get(uri)
