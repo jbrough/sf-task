@@ -1,3 +1,0 @@
-export SF_MONTAGE_HOST=sf-montage.herokuapp.com
-export SF_QUEUE_HOST=sf-queue.herokuapp.com
-export SF_STORAGE_HOST=sf-storage.herokuapp.com
